@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Order Meeting Room - PT SSI</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-size: 15px;
+    }
+    .card {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .btn {
+      border-radius: 10px;
+    }
+    table {
+      font-size: 14px;
+    }
+    th {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-4">
+  <h4 class="text-center mb-4">🗓️ Form Order Meeting Room</h4>
+  
+  <form id="bookingForm" class="card p-3">
+    <div class="mb-3">
+      <label class="form-label">Nama Pemesan</label>
+      <input type="text" class="form-control" id="nama" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Divisi / Unit</label>
+      <input type="text" class="form-control" id="divisi" required>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Ruang</label>
+      <select class="form-select" id="ruang" required>
+        <option value="">-- Pilih Ruangan --</option>
+        <option>Ruang Lantai 3 - Marotai</option>
+        <option>Ruang Lantai 3 - Natuna</option>
+        <option>Ruang Lantai 2</option>
+        <option>Ruang Lantai 1 - Rote</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="col mb-3">
+        <label class="form-label">Jam Mulai</label>
+        <input type="time" class="form-control" id="jamMulai" required>
+      </div>
+      <div class="col mb-3">
+        <label class="form-label">Jam Akhir</label>
+        <input type="time" class="form-control" id="jamAkhir" required>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Acara</label>
+      <input type="text" class="form-control" id="acara" required>
+    </div>
+    <button type="submit" class="btn btn-success w-100">Kirim Pemesanan</button>
+  </form>
+
+  <hr class="my-4">
+
+  <h5 class="text-center mb-3">📋 20 Data Pemesanan Terbaru</h5>
+  <div id="dataContainer" class="table-responsive">
+    <table class="table table-sm table-bordered table-striped">
+      <thead class="table-success">
+        <tr>
+          <th>Timestamp</th>
+          <th>Nama</th>
+          <th>Divisi</th>
+          <th>Ruang</th>
+          <th>Jam Mulai</th>
+          <th>Jam Akhir</th>
+          <th>Acara</th>
+        </tr>
+      </thead>
+      <tbody id="dataBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal untuk bentrok -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-danger">
+      <div class="modal-header bg-danger text-white">
+        <h6 class="modal-title">⚠️ Jadwal Bentrok</h6>
+      </div>
+      <div class="modal-body text-center">
+        Jam dan ruang bentrok!<br>
+        Silahkan sesuaikan kembali jadwal pemesanan Anda.<br>Terimakasih 🙏
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbxeULv9vlM-DuGPl4E_GCbCeooKR3Ay1jTP4yZg_ZycosMzQGD_KTElNStNeBuF0tgLRQ/exec"; // Ganti dengan URL Google Apps Script kamu
+
+document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  
+  const data = {
+    nama: document.getElementById("nama").value.trim(),
+    divisi: document.getElementById("divisi").value.trim(),
+    ruang: document.getElementById("ruang").value,
+    jamMulai: document.getElementById("jamMulai").value,
+    jamAkhir: document.getElementById("jamAkhir").value,
+    acara: document.getElementById("acara").value.trim(),
+  };
+
+  const res = await fetch(scriptURL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  });
+  
+  const result = await res.json();
+
+  if (result.status === "conflict") {
+    new bootstrap.Modal(document.getElementById('alertModal')).show();
+  } else {
+    alert("✅ Data berhasil disimpan!");
+    document.getElementById("bookingForm").reset();
+    loadData();
+  }
+});
+
+// Fungsi ambil data 20 terakhir
+async function loadData() {
+  const res = await fetch(`${scriptURL}?read=true`);
+  const data = await res.json();
+  const tbody = document.getElementById("dataBody");
+  tbody.innerHTML = "";
+  
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${row.timestamp}</td>
+      <td>${row.nama}</td>
+      <td>${row.divisi}</td>
+      <td>${row.ruang}</td>
+      <td>${row.jamMulai}</td>
+      <td>${row.jamAkhir}</td>
+      <td>${row.acara}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.onload = loadData;
+</script>
+
+</body>
+</html>
