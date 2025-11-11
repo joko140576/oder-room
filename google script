@@ -1,0 +1,59 @@
+function doPost(e) {
+  try {
+    // Ganti dengan ID Spreadsheet kamu
+    const SHEET_ID = "19Y_GyqG6dTAko-1zfkX1nnIYf_L3WsVLxuMNe0EcDAg";  
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const sheet = ss.getSheetByName("Data") || ss.insertSheet("Data");
+    const data = JSON.parse(e.postData.contents);
+
+    // Tambahkan header jika belum ada
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["Timestamp", "Nama", "Divisi", "Ruang", "Jam Mulai", "Jam Selesai", "Acara"]);
+    }
+
+    // Simpan data
+    sheet.appendRow([
+      new Date(),
+      data.nama || "",
+      data.divisi || "",
+      data.ruang || "",
+      data.jamMulai || "",
+      data.jamSelesai || "",
+      data.acara || ""
+    ]);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: "success" }))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+      .setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ result: "error", message: err }))
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader("Access-Control-Allow-Origin", "*")
+      .setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+      .setHeader("Access-Control-Allow-Headers", "Content-Type");
+  }
+}
+
+function doGet(e) {
+  return ContentService
+    .createTextOutput("OK")
+    .setMimeType(ContentService.MimeType.TEXT)
+    .setHeader("Access-Control-Allow-Origin", "*")
+    .setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+    .setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
+
+// 🔹 Tambahkan handler OPTIONS agar tidak error CORS
+function doOptions(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({ result: "ok" }))
+    .setMimeType(ContentService.MimeType.JSON)
+    .setHeader("Access-Control-Allow-Origin", "*")
+    .setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+    .setHeader("Access-Control-Allow-Headers", "Content-Type");
+}
