@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Pemesanan Ruang Rapat</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f8f9fa; }
+    body { background: #f8f9fa; }
     .card { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     th { background-color: #0d6efd; color: white; }
   </style>
@@ -16,37 +16,37 @@
     <div class="card p-3">
       <h4 class="text-center mb-3">📅 Pemesanan Ruang Rapat</h4>
 
-      <form id="formPemesanan" class="needs-validation" novalidate>
+      <form id="formPemesanan">
         <div class="mb-3">
           <label class="form-label">Nama Pemesan</label>
-          <input type="text" id="nama" class="form-control" required>
+          <input type="text" name="nama" class="form-control" required>
         </div>
         <div class="mb-3">
           <label class="form-label">Divisi / Unit</label>
-          <input type="text" id="divisi" class="form-control" required>
+          <input type="text" name="divisi" class="form-control" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Pilih Ruang Rapat</label>
-          <select id="ruang" class="form-select" required>
+          <label class="form-label">Ruang Rapat</label>
+          <select name="ruang" class="form-select" required>
             <option value="">-- Pilih Ruangan --</option>
-            <option value="Lantai 3 - Natuna">Ruang Meeting Lantai 3 - Natuna</option>
-            <option value="Lantai 2">Ruang Meeting Lantai 2</option>
-            <option value="Lantai 1 - Rote">Ruang Meeting Lantai 1 - Rote</option>
+            <option value="Lantai 3 - Natuna">Lantai 3 - Natuna</option>
+            <option value="Lantai 2">Lantai 2</option>
+            <option value="Lantai 1 - Rote">Lantai 1 - Rote</option>
           </select>
         </div>
         <div class="row g-2 mb-3">
           <div class="col-6">
             <label class="form-label">Jam Mulai</label>
-            <input type="time" id="jamMulai" class="form-control" required>
+            <input type="time" name="jamMulai" class="form-control" required>
           </div>
           <div class="col-6">
             <label class="form-label">Jam Selesai</label>
-            <input type="time" id="jamSelesai" class="form-control" required>
+            <input type="time" name="jamSelesai" class="form-control" required>
           </div>
         </div>
         <div class="mb-3">
           <label class="form-label">Acara</label>
-          <input type="text" id="acara" class="form-control" required>
+          <input type="text" name="acara" class="form-control" required>
         </div>
 
         <button type="submit" class="btn btn-primary w-100">Pesan Ruang</button>
@@ -75,105 +75,61 @@
     </div>
   </div>
 
-  <!-- Modal Bentrok -->
-  <div class="modal fade" id="modalBentrok" tabindex="-1">
+  <!-- Modal alert -->
+  <div class="modal fade" id="modalAlert" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header bg-danger text-white">
           <h5 class="modal-title">⚠️ Jadwal Bentrok</h5>
           <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body">
-          Tanggal dan ruangan bentrok! Coba ubah jamnya atau pesan di hari lain.
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-danger" data-bs-dismiss="modal">Tutup</button>
-        </div>
+        <div class="modal-body">Tanggal dan ruangan bentrok! Silakan ubah jam atau pilih hari lain.</div>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // 🔹 Ganti URL di bawah ini dengan URL Web App milikmu (Google Apps Script)
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaacQwqj9Z-K_aBxP1XIH31lnrJ40ErpFF_0kbHspOV5M4hqK6OYx8HlixmEQxm1Dz/exec";
-   
-
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyEwVi2KjLw3LoBdMIM4FJUhosGk8DxEM8EvHdAQVBMM71E32uO08ZWvFQ41qXhyAPa/exec";
     const form = document.getElementById("formPemesanan");
     const tabel = document.querySelector("#tabelPemesanan tbody");
-    const modalBentrok = new bootstrap.Modal(document.getElementById("modalBentrok"));
     const dataPemesanan = [];
-    const tanggalSekarang = document.getElementById("tanggalSekarang");
+    const modalAlert = new bootstrap.Modal(document.getElementById("modalAlert"));
+    document.getElementById("tanggalSekarang").textContent =
+      "Tanggal: " + new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
-    // 🔸 Definisikan semua input
-    const namaInput = document.getElementById("nama");
-    const divisiInput = document.getElementById("divisi");
-    const ruangInput = document.getElementById("ruang");
-    const jamMulaiInput = document.getElementById("jamMulai");
-    const jamSelesaiInput = document.getElementById("jamSelesai");
-    const acaraInput = document.getElementById("acara");
-
-    // Tampilkan tanggal hari ini
-    tanggalSekarang.textContent = "Tanggal Hari Ini: " + new Date().toLocaleDateString('id-ID', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    });
-
-    // Event submit form
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      e.stopPropagation();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      const tanggal = new Date().toLocaleDateString("id-ID");
 
-      if (!form.checkValidity()) {
-        form.classList.add("was-validated");
-        return;
-      }
-
-      const nama = namaInput.value.trim();
-      const divisi = divisiInput.value.trim();
-      const ruang = ruangInput.value;
-      const jamMulai = jamMulaiInput.value;
-      const jamSelesai = jamSelesaiInput.value;
-      const acara = acaraInput.value.trim();
-      const tanggal = new Date().toLocaleDateString('id-ID');
-
-      // 🔸 Cek bentrok
+      // cek bentrok di frontend
       const bentrok = dataPemesanan.some(p =>
-        p.tanggal === tanggal && p.ruang === ruang &&
-        ((jamMulai >= p.jamMulai && jamMulai < p.jamSelesai) ||
-         (jamSelesai > p.jamMulai && jamSelesai <= p.jamSelesai) ||
-         (jamMulai <= p.jamMulai && jamSelesai >= p.jamSelesai))
+        p.tanggal === tanggal && p.ruang === data.ruang &&
+        ((data.jamMulai >= p.jamMulai && data.jamMulai < p.jamSelesai) ||
+         (data.jamSelesai > p.jamMulai && data.jamSelesai <= p.jamSelesai) ||
+         (data.jamMulai <= p.jamMulai && data.jamSelesai >= p.jamSelesai))
       );
-
       if (bentrok) {
-        modalBentrok.show();
+        modalAlert.show();
         return;
       }
 
-      // 🔸 Simpan di frontend
-      const pesanan = { tanggal, nama, divisi, ruang, jamMulai, jamSelesai, acara };
-      dataPemesanan.unshift(pesanan);
-
-      // Maksimal 20 baris di tampilan
+      data.tanggal = tanggal;
+      dataPemesanan.unshift(data);
       if (dataPemesanan.length > 20) dataPemesanan.pop();
-
       renderTabel();
 
-      // 🔸 Kirim ke Google Sheets
       try {
-        await fetch(SCRIPT_URL, {
-          method: "POST",
-          body: JSON.stringify(pesanan),
-          headers: { "Content-Type": "application/json" }
-        });
+        await fetch(SCRIPT_URL, { method: "POST", body: formData });
       } catch (err) {
-        console.error("Gagal kirim ke Google Sheets:", err);
+        console.error("Gagal kirim:", err);
       }
 
       form.reset();
-      form.classList.remove("was-validated");
     });
 
-    // 🔹 Render tabel di halaman
     function renderTabel() {
       tabel.innerHTML = "";
       dataPemesanan.forEach(p => {
@@ -185,8 +141,7 @@
           <td>${p.ruang}</td>
           <td>${p.jamMulai}</td>
           <td>${p.jamSelesai}</td>
-          <td>${p.acara}</td>
-        `;
+          <td>${p.acara}</td>`;
       });
     }
   </script>
