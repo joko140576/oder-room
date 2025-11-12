@@ -4,22 +4,39 @@ function doGet(e) {
 
   // Buat header jika sheet baru
   if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, 8).setValues([[
+    sheet.getRange(1, 1, 1, 7).setValues([[
       "Waktu Input", 
       "Tanggal Meeting", 
       "Nama Pemesan", 
       "Divisi/Unit", 
-      "Ruang", 
       "Jam Mulai", 
       "Jam Akhir", 
       "Acara"
     ]]);
     
     // Set lebar kolom agar rapi
-    sheet.setColumnWidths(1, 8, 120);
+    sheet.setColumnWidths(1, 7, 120);
   }
 
   const cache = CacheService.getScriptCache();
+
+  // 🔥 FUNGSI HAPUS DATA
+  if (e.parameter.delete == "true" && e.parameter.row) {
+    const rowToDelete = parseInt(e.parameter.row);
+    
+    // Validasi: row harus antara 2 dan last row (skip header)
+    if (rowToDelete >= 2 && rowToDelete <= sheet.getLastRow()) {
+      sheet.deleteRow(rowToDelete);
+      cache.remove('meeting_data_cache');
+      return ContentService
+        .createTextOutput("DELETED")
+        .setMimeType(ContentService.MimeType.TEXT);
+    } else {
+      return ContentService
+        .createTextOutput("INVALID_ROW")
+        .setMimeType(ContentService.MimeType.TEXT);
+    }
+  }
 
   // BACA DATA
   if (e.parameter.read == "true") {
@@ -48,77 +65,135 @@ function doGet(e) {
       
       const formattedRow = [...row];
       
-      // Format Waktu Input
+      // Kolom 0: Waktu Input
       if (formattedRow[0] instanceof Date) {
         formattedRow[0] = Utilities.formatDate(formattedRow[0], Session.getScriptTimeZone(), 'dd-MM-yyyy HH:mm');
+      } else if (typeof formattedRow[0] === 'string') {
+        formattedRow[0] = formattedRow[0].replace(/\s+/g, ' ').trim();
       }
       
-      // 🔥 PERBAIKAN: Format Tanggal Meeting - handle semua kemungkinan format
+      // Kolom 1: Tanggal Meeting
       if (formattedRow[1] instanceof Date) {
-        // Jika sudah Date object, format ke dd-MM-yyyy
         formattedRow[1] = Utilities.formatDate(formattedRow[1], Session.getScriptTimeZone(), 'dd-MM-yyyy');
       } else if (typeof formattedRow[1] === 'string') {
         if (formattedRow[1].match(/^\d{4}-\d{2}-\d{2}$/)) {
-          // Format: 2025-11-12 -> 12-11-2025
           const parts = formattedRow[1].split('-');
           formattedRow[1] = `${parts[2]}-${parts[1]}-${parts[0]}`;
-        } else if (formattedRow[1].includes('T')) {
-          // Format: 2025-11-11T17:00:00.000Z -> 11-11-2025
-          const date = new Date(formattedRow[1]);
-          formattedRow[1] = Utilities.formatDate(date, Session.getScriptTimeZone(), 'dd-MM-yyyy');
         }
-        // Jika sudah format dd-MM-yyyy, biarkan saja
+        formattedRow[1] = formattedRow[1].replace(/\s+/g, ' ').trim();
       }
       
-      // Format Jam
-      [5, 6].forEach(col => {
-        if (formattedRow[col] instanceof Date) {
-          formattedRow[col] = Utilities.formatDate(formattedRow[col], Session.getScriptTimeZone(), 'HH:mm');
-        } else if (typeof formattedRow[col] === 'string' && formattedRow[col].includes('T')) {
-          const time = new Date(formattedRow[col]);
-          formattedRow[col] = Utilities.formatDate(time, Session.getScriptTimeZone(), 'HH:mm');
-        } else if (typeof formattedRow[col] === 'string') {
-          formattedRow[col] = formattedRow[col].substring(0, 5);
+      // Kolom 2 & 3: Nama dan Divisi - bersihkan spasi
+      [2, 3].forEach(colIndex => {
+        if (typeof formattedRow[colIndex] === 'string') {
+          formattedRow[colIndex] = formattedRow[colIndex].replace(/\s+/g, ' ').trim();
         }
       });
+      
+      // 🔥 PERBAIKAN BESAR: Format Jam Mulai dan Jam Akhir
+      [4, 5].forEach(colIndex => {
+        if (formattedRow[colIndex] instanceof Date) {
+          // Handle Date object - format ke HH:mm
+          formattedRow[colIndex] = Utilities.formatDate(formattedRow[colIndex], Session.getScriptTimeZone(), 'HH:mm');
+        } else if (typeof formattedRow[colIndex] === 'string') {
+          // Handle string yang mengandung format date error (1899)
+          if (formattedRow[colIndex].includes('1899') || formattedRow[colIndex].includes('12/30/1899')) {
+            // 🔥 FIX: Ambil hanya bagian waktu saja dari string yang error
+            const timeMatch = formattedRow[colIndex].match(/(\d{1,2}:\d{2})/);
+            if (timeMatch) {
+              formattedRow[colIndex] = timeMatch[1];
+            } else {
+              formattedRow[colIndex] = ''; // Kosongkan jika tidak bisa di-parse
+            }
+          } else if (formattedRow[colIndex].includes('T')) {
+            // Handle ISO string
+            try {
+              const time = new Date(formattedRow[colIndex]);
+              formattedRow[colIndex] = Utilities.formatDate(time, Session.getScriptTimeZone(), 'HH:mm');
+            } catch (e) {
+              // Jika parsing gagal, ambil 5 karakter pertama
+              formattedRow[colIndex] = formattedRow[colIndex].substring(0, 5);
+            }
+          } else {
+            // Handle string waktu normal - ambil hanya HH:mm
+            formattedRow[colIndex] = formattedRow[colIndex].substring(0, 5).trim();
+          }
+        } else if (formattedRow[colIndex] && typeof formattedRow[colIndex].getHours === 'function') {
+          // Handle object time yang bukan Date
+          try {
+            const hours = formattedRow[colIndex].getHours().toString().padStart(2, '0');
+            const minutes = formattedRow[colIndex].getMinutes().toString().padStart(2, '0');
+            formattedRow[colIndex] = `${hours}:${minutes}`;
+          } catch (e) {
+            formattedRow[colIndex] = '';
+          }
+        }
+        
+        // 🔥 VALIDASI FINAL: Pastikan format HH:mm
+        if (formattedRow[colIndex] && typeof formattedRow[colIndex] === 'string') {
+          const timeStr = formattedRow[colIndex].trim();
+          if (timeStr.match(/^\d{1,2}:\d{2}$/)) {
+            // Format sudah benar, biarkan saja
+            formattedRow[colIndex] = timeStr;
+          } else if (timeStr.match(/^\d{1,2}:\d{2}:\d{2}$/)) {
+            // Hapus detik
+            formattedRow[colIndex] = timeStr.substring(0, 5);
+          } else {
+            // Jika format tidak valid, set ke empty
+            formattedRow[colIndex] = '';
+          }
+        }
+      });
+      
+      // Kolom 6: Acara - bersihkan spasi
+      if (typeof formattedRow[6] === 'string') {
+        formattedRow[6] = formattedRow[6].replace(/\s+/g, ' ').trim();
+      }
       
       return formattedRow;
     });
     
-    const jsonData = JSON.stringify(formattedData);
+    const finalData = formattedData.filter((row, index) => {
+      if (index === 0) return true;
+      const firstCell = String(row[0]).trim();
+      if (firstCell.includes("Waktu Input") && firstCell.includes("Tanggal Meeting")) {
+        return false;
+      }
+      return true;
+    });
+    
+    const jsonData = JSON.stringify(finalData);
     cache.put(cacheKey, jsonData, 30);
     
     return ContentService
       .createTextOutput(jsonData)
-      .setMimeType(ContentService.MimeType.JSON);
+      .setMimeType(ContentService.MimeType.JSON)
+      .setHeader('Access-Control-Allow-Origin', '*');
   }
 
   // SIMPAN DATA BARU
   cache.remove('meeting_data_cache');
 
-  // 🔥 PERBAIKAN: Simpan tanggal sebagai STRING format DD-MM-YYYY langsung
   const tanggalInput = e.parameter.tanggal || "";
   let tanggalFormatted = "";
   
   if (tanggalInput) {
-    // Input dari HTML: YYYY-MM-DD -> Convert ke DD-MM-YYYY
     const parts = tanggalInput.split('-');
     if (parts.length === 3) {
       tanggalFormatted = `${parts[2]}-${parts[1]}-${parts[0]}`;
     } else {
-      tanggalFormatted = tanggalInput; // Fallback
+      tanggalFormatted = tanggalInput;
     }
   }
 
   const row = [
-    new Date(),                             // Kolom A: Waktu Input (tetap Date)
-    tanggalFormatted,                       // Kolom B: Tanggal Meeting (STRING dd-mm-yyyy)
-    e.parameter.nama || "",                 // Kolom C: Nama Pemesan
-    e.parameter.divisi || "",               // Kolom D: Divisi/Unit
-    e.parameter.ruang || "",                // Kolom E: Ruang
-    e.parameter.mulai || "",                // Kolom F: Jam Mulai
-    e.parameter.akhir || "",                // Kolom G: Jam Akhir
-    e.parameter.acara || ""                 // Kolom H: Acara
+    new Date(),
+    tanggalFormatted,
+    e.parameter.nama || "",
+    e.parameter.divisi || "",
+    e.parameter.mulai || "",
+    e.parameter.akhir || "",
+    e.parameter.acara || ""
   ];
 
   sheet.appendRow(row);
