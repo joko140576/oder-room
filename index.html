@@ -11,6 +11,8 @@
       --primary: #2c5aa0;
       --secondary: #6c757d;
       --success: #198754;
+      --warning: #ffc107;
+      --danger: #dc3545;
       --light: #f8f9fa;
       --dark: #343a40;
     }
@@ -77,6 +79,35 @@
       box-shadow: 0 5px 15px rgba(25, 135, 84, 0.4);
     }
     
+    .btn-warning {
+      background: linear-gradient(135deg, var(--warning), #e0a800);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: var(--dark);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger), #c82333);
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+    }
+    
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    
     .table-responsive {
       border-radius: 15px;
       overflow: hidden;
@@ -102,6 +133,21 @@
       background-color: rgba(44, 90, 160, 0.05);
     }
 
+    /* Highlight untuk jadwal bentrok */
+    .conflict-row {
+      background-color: rgba(220, 53, 69, 0.1) !important;
+      border-left: 4px solid var(--danger);
+    }
+    
+    .conflict-badge {
+      background: var(--danger);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      margin-left: 5px;
+    }
+
     /* Mobile Optimizations */
     @media (max-width: 768px) {
       .container {
@@ -115,12 +161,91 @@
       
       .table-responsive {
         font-size: 12px;
+        overflow-x: auto;
       }
       
       .table th, .table td {
         padding: 8px 5px;
         font-size: 12px;
+        white-space: nowrap;
       }
+      
+      /* Tambahan untuk tabel responsif di mobile */
+      .table-mobile-view {
+        min-width: 850px;
+      }
+      
+      .btn-sm {
+        padding: 4px 8px;
+        font-size: 11px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .table-mobile-view {
+        min-width: 950px;
+      }
+      
+      .btn-lg {
+        padding: 10px 15px;
+        font-size: 14px;
+      }
+    }
+    
+    /* Loading spinner */
+    .loading-spinner {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    /* Smooth transitions */
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Warning modal styling */
+    .warning-modal .modal-content {
+      border: 3px solid var(--warning);
+      border-radius: 15px;
+    }
+    
+    .warning-modal .text-warning {
+      color: var(--warning) !important;
+    }
+    
+    /* Delete confirmation modal */
+    .delete-modal .modal-content {
+      border: 3px solid var(--danger);
+      border-radius: 15px;
+    }
+    
+    .delete-modal .text-danger {
+      color: var(--danger) !important;
+    }
+    
+    /* Conflict item styling */
+    .conflict-item {
+      transition: all 0.3s ease;
+    }
+    
+    .conflict-item:hover {
+      background-color: rgba(255, 193, 7, 0.1) !important;
+    }
+    
+    .delete-btn {
+      opacity: 0.7;
+      transition: all 0.3s ease;
+    }
+    
+    .delete-btn:hover {
+      opacity: 1;
+      transform: scale(1.05);
     }
   </style>
 </head>
@@ -130,8 +255,9 @@
     <div class="row mb-4">
       <div class="col-12 text-center text-white">
         <h1 class="display-5 fw-bold mb-3">
-          <i class="fas fa-calendar-alt me-3"></i>Booking Ruang Meeting
+          <i class="fas fa-calendar-alt me-3"></i>Booking Ruang Meeting Lt.2
         </h1>
+        <p class="lead">Sistem pemesanan ruang meeting lantai 2 dengan deteksi bentrok</p>
       </div>
     </div>
 
@@ -142,8 +268,8 @@
           <div class="header-gradient">
             <div class="d-flex align-items-center">
               <div>
-                <h4 class="mb-1">Form Pemesanan</h4>
-                <p class="mb-0">Isi form berikut untuk memesan ruang meeting</p>
+                <h4 class="mb-1">Form Pemesanan Ruang meeting Lt.2</h4>
+                <p class="mb-0">Isi form berikut untuk memesan ruang meeting Lt. 2</p>
               </div>
             </div>
           </div>
@@ -163,18 +289,20 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-semibold">🏢 Divisi / Unit</label>
-                <input type="text" class="form-control" name="divisi" placeholder="Contoh: IT, Marketing, HR" required>
-              </div>
-              <div class="col-md-6 mb-3">
-                <label class="form-label fw-semibold">🚪 Ruang Meeting</label>
-                <select class="form-select" name="ruang" required>
-                  <option value="">-- Pilih Ruang --</option>
-                  <option>Ruang Lantai 3 - Marotai</option>
-                  <option>Ruang Lantai 3 - Natuna</option>
-                  <option>Ruang Lantai 2</option>
-                  <option>Ruang Lantai 1 - Rote</option>
+                <select class="form-select" name="divisi" required>
+                  <option value="">-- Pilih Divisi --</option>
+                  <option>Divisi HCC</option>
+                  <option>Divisi FRM</option>
+                  <option>Divisi PLM</option>
+                  <option>Divisi CSI</option>
+                  <option>Divisi INA</option>
+                  <option>Divisi OPR1</option>
+                  <option>Divisi OPR2</option>
+                  <option>Divisi OPS</option>
+                  <option>Divisi MBD</option>
+                  <option>Divisi SBD</option>
                 </select>
-              </div>
+              </div>             
             </div>
             
             <div class="row">
@@ -208,28 +336,37 @@
 
     <!-- Data Table -->
     <div id="dataTable" class="mt-4" style="display:none;">
-      <div class="glass-card p-4">
+      <div class="glass-card p-4 fade-in">
         <div class="header-gradient">
           <div class="d-flex align-items-center">
             <div>
-              <h4 class="mb-1">Data Pemesanan Terbaru</h4>
-              <p class="mb-0">20 pemesanan terakhir</p>
+              <h4 class="mb-1">Data Pemesanan Terbaru Ruang Meeting Lantai 2</h4>
+              <p class="mb-0">20 pemesanan terakhir <span class="conflict-badge">BENTROK</span> = Jadwal bertabrakan</p>
             </div>
           </div>
         </div>
         
+        <!-- Loading Spinner -->
+        <div id="loadingSpinner" class="loading-spinner">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2 text-muted">Memuat data...</p>
+        </div>
+        
         <div class="table-responsive mt-3">
-          <table class="table table-striped" id="tableContent">
+          <table class="table table-striped table-mobile-view" id="tableContent">
             <thead>
               <tr>
                 <th>Waktu Input</th>
                 <th>Tanggal Meeting</th>
-                <th>Nama pemesan/th>
+                <th>Nama Pemesan</th>
                 <th>Divisi</th>
-                <th>Ruang</th>
                 <th>Jam Mulai</th>
                 <th>Jam Akhir</th>
                 <th>Acara</th>
+                <th>Status</th>
+                <th>Aksi Hapus</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -237,7 +374,7 @@
         </div>
         
         <div class="text-center mt-3">
-          <button class="btn btn-outline-primary" onclick="document.getElementById('dataTable').style.display='none'">
+          <button class="btn btn-outline-primary" onclick="hideDataTable()">
             <i class="fas fa-times me-2"></i>Tutup Tabel
           </button>
         </div>
@@ -245,7 +382,7 @@
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Success Modal -->
   <div class="modal fade" id="responseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content text-center p-4">
@@ -254,10 +391,64 @@
             <i class="fas fa-check-circle" style="font-size: 4rem;"></i>
           </div>
           <h4 class="text-success mb-3">✅ Berhasil Disimpan!</h4>
-          <p class="text-muted mb-4">Data pemesanan ruang meeting telah tersimpan. Cek Data apakah ada jadwal bentrok dengan anda !</p>
+          <p class="text-muted mb-4">Data pemesanan ruang meeting telah tersimpan. Lihat Data pemesanan apakah jadwal anda bentrok atau tidak ?</p>
           <button class="btn btn-primary px-4" data-bs-dismiss="modal">
             <i class="fas fa-check me-2"></i>Mengerti
           </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warning Modal (Bentrok Jadwal) -->
+  <div class="modal fade warning-modal" id="warningModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center p-4">
+        <div class="modal-body">
+          <div class="text-warning mb-3">
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem;"></i>
+          </div>
+          <h4 class="text-warning mb-3">⚠️ Jadwal Bentrok!</h4>
+          <p class="text-muted mb-3" id="conflictMessage">Jadwal Anda bertabrakan dengan pemesanan lain:</p>
+          <div id="conflictDetails" class="text-start mb-4">
+            <!-- Detail bentrok akan diisi oleh JavaScript -->
+          </div>
+          <p class="text-muted small mb-4">Silakan pilih tanggal atau jam yang berbeda, atau hapus jadwal yang bentrok.</p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button class="btn btn-warning px-4" data-bs-dismiss="modal">
+              <i class="fas fa-edit me-2"></i>Ubah Jadwal
+            </button>
+            <button class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+              <i class="fas fa-times me-2"></i>Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade delete-modal" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center p-4">
+        <div class="modal-body">
+          <div class="text-danger mb-3">
+            <i class="fas fa-trash-alt" style="font-size: 4rem;"></i>
+          </div>
+          <h4 class="text-danger mb-3">🗑️ Hapus Jadwal?</h4>
+          <p class="text-muted mb-3" id="deleteMessage">Anda akan menghapus jadwal berikut:</p>
+          <div id="deleteDetails" class="text-start mb-4 p-3 bg-light rounded">
+            <!-- Detail hapus akan diisi oleh JavaScript -->
+          </div>
+          <p class="text-danger small mb-4"><strong>⚠️ Tindakan ini tidak dapat dibatalkan!</strong></p>
+          <div class="d-flex gap-2 justify-content-center">
+            <button class="btn btn-danger px-4" id="confirmDeleteBtn">
+              <i class="fas fa-trash me-2"></i>Ya, Hapus
+            </button>
+            <button class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">
+              <i class="fas fa-times me-2"></i>Batal
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -267,116 +458,504 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
+    // Global variables
+    let isTableLoading = false;
+    let isTableVisible = false;
+    let allBookingData = [];
+    let currentConflictData = [];
+    let currentDeleteIndex = null;
+
+    // Function to hide data table
+    function hideDataTable() {
+      const dataTable = document.getElementById('dataTable');
+      dataTable.style.display = 'none';
+      isTableVisible = false;
+    }
+
+    // Function to check for schedule conflicts
+    function checkScheduleConflicts(newBooking, existingBookings) {
+      const conflicts = [];
+      
+      const newDate = newBooking.tanggal;
+      const newStart = newBooking.mulai;
+      const newEnd = newBooking.akhir;
+      
+      existingBookings.forEach((existing, index) => {
+        if (existing.tanggal !== newDate) return;
+        
+        const existingStart = existing.mulai;
+        const existingEnd = existing.akhir;
+        
+        const isConflict = (
+          (newStart >= existingStart && newStart < existingEnd) ||
+          (newEnd > existingStart && newEnd <= existingEnd) ||
+          (newStart <= existingStart && newEnd >= existingEnd)
+        );
+        
+        if (isConflict) {
+          conflicts.push({
+            index: index,
+            rowNumber: existing.rowNumber,
+            nama: existing.nama,
+            divisi: existing.divisi,
+            mulai: existing.mulai,
+            akhir: existing.akhir,
+            acara: existing.acara,
+            waktuInput: existing.waktuInput
+          });
+        }
+      });
+      
+      return conflicts;
+    }
+
+    // Function to parse time to minutes for comparison
+    function timeToMinutes(timeStr) {
+      if (!timeStr) return 0;
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    }
+
+    // Function to detect conflicts in existing data for table highlighting
+    function detectAllConflicts(bookings) {
+      const conflicts = [];
+      
+      for (let i = 0; i < bookings.length; i++) {
+        for (let j = i + 1; j < bookings.length; j++) {
+          const booking1 = bookings[i];
+          const booking2 = bookings[j];
+          
+          if (booking1.tanggal === booking2.tanggal) {
+            const start1 = timeToMinutes(booking1.mulai);
+            const end1 = timeToMinutes(booking1.akhir);
+            const start2 = timeToMinutes(booking2.mulai);
+            const end2 = timeToMinutes(booking2.akhir);
+            
+            const isConflict = (
+              (start1 >= start2 && start1 < end2) ||
+              (end1 > start2 && end1 <= end2) ||
+              (start1 <= start2 && end1 >= end2)
+            );
+            
+            if (isConflict) {
+              conflicts.push(booking1.id || i);
+              conflicts.push(booking2.id || j);
+            }
+          }
+        }
+      }
+      
+      return [...new Set(conflicts)];
+    }
+
+    // 🔥 PERBAIKAN: Pindahkan fungsi-fungsi ke global scope
+    // Function to load all booking data
+    // Di dalam fungsi loadAllBookingData(), tambahkan validasi:
+async function loadAllBookingData() {
+  try {
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxKi2_GciUPrFFMZnCPmey_LimTcu3HXbr_10a37ip9eBXGIUK3We9pplFsC2iheKbSTg/exec';
+    const sheetUrl = scriptURL + '?read=true';
+    const res = await fetch(sheetUrl);
+    
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    
+    const data = await res.json();
+    allBookingData = [];
+    
+    if (data && data.length > 0) {
+      data.forEach((row, index) => {
+        if (index === 0) return;
+        if (!row[1] && !row[2]) return;
+        
+        const firstCell = String(row[0]).trim();
+        if (firstCell.includes("Waktu Input") && firstCell.includes("Tanggal Meeting")) return;
+        
+        // 🔥 VALIDASI: Bersihkan data waktu yang corrupt
+        let jamMulai = row[4] || '';
+        let jamAkhir = row[5] || '';
+        
+        // Handle format 1899- (data corrupt)
+        if (String(jamMulai).includes('1899') || String(jamMulai).includes('12/30/1899')) {
+          const timeMatch = String(jamMulai).match(/(\d{1,2}:\d{2})/);
+          jamMulai = timeMatch ? timeMatch[1] : '';
+        }
+        
+        if (String(jamAkhir).includes('1899') || String(jamAkhir).includes('12/30/1899')) {
+          const timeMatch = String(jamAkhir).match(/(\d{1,2}:\d{2})/);
+          jamAkhir = timeMatch ? timeMatch[1] : '';
+        }
+        
+        // Validasi format HH:mm
+        if (jamMulai && !jamMulai.match(/^\d{1,2}:\d{2}$/)) {
+          jamMulai = '';
+        }
+        
+        if (jamAkhir && !jamAkhir.match(/^\d{1,2}:\d{2}$/)) {
+          jamAkhir = '';
+        }
+        
+        allBookingData.push({
+          rowNumber: index + 1,
+          waktuInput: row[0] || '',
+          tanggal: row[1] || '',
+          nama: row[2] || '',
+          divisi: row[3] || '',
+          mulai: jamMulai, // 🔥 Gunakan data yang sudah dibersihkan
+          akhir: jamAkhir, // 🔥 Gunakan data yang sudah dibersihkan
+          acara: row[6] || ''
+        });
+      });
+    }
+  } catch (err) {
+    console.error('Error loading booking data:', err);
+  }
+}
+
+    // Function to delete booking
+    async function deleteBooking(rowNumber) {
+      try {
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxKi2_GciUPrFFMZnCPmey_LimTcu3HXbr_10a37ip9eBXGIUK3We9pplFsC2iheKbSTg/exec';
+        const deleteUrl = scriptURL + '?delete=true&row=' + rowNumber;
+        const response = await fetch(deleteUrl);
+        
+        if (response.ok) {
+          // 🔥 PERBAIKAN: Panggil fungsi yang sudah di global scope
+          await loadAllBookingData();
+          
+          // Tutup modal delete
+          const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+          if (deleteModal) {
+            deleteModal.hide();
+          }
+          
+          // Tampilkan success message
+          alert('✅ Jadwal berhasil dihapus!');
+          
+          // Refresh tabel jika sedang terbuka
+          if (isTableVisible) {
+            // Trigger click pada tombol lihat data untuk refresh
+            const lihatDataBtn = document.getElementById('lihatData');
+            if (lihatDataBtn) {
+              lihatDataBtn.click();
+            }
+          }
+        } else {
+          throw new Error('Gagal menghapus data');
+        }
+      } catch (err) {
+        console.error('Error deleting booking:', err);
+        alert('❌ Gagal menghapus jadwal! Silakan coba lagi.');
+      }
+    }
+
+    // Function to show delete confirmation modal
+    function showDeleteModal(rowNumber, nama, tanggal, jam) {
+      currentDeleteIndex = rowNumber;
+      
+      const deleteMessage = document.getElementById('deleteMessage');
+      const deleteDetails = document.getElementById('deleteDetails');
+      
+      if (deleteMessage && deleteDetails) {
+        deleteMessage.innerHTML = `Anda akan menghapus jadwal berikut:`;
+        deleteDetails.innerHTML = `
+          <div class="text-center">
+            <strong>${nama}</strong><br>
+            <small>Tanggal: ${tanggal}</small><br>
+            <small>Jam: ${jam}</small>
+          </div>
+        `;
+      }
+      
+      const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+      deleteModal.show();
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-      const scriptURL = 'https://script.google.com/macros/s/AKfycbwtO8UGhgyzHzf9zpqRYlGFkK63JhbTJFtFq7U1iiLxI9puUEzXltjzUvKejOmSoO2Z3Q/exec';
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbxKi2_GciUPrFFMZnCPmey_LimTcu3HXbr_10a37ip9eBXGIUK3We9pplFsC2iheKbSTg/exec';
 
       const orderForm = document.getElementById('orderForm');
       const lihatDataBtn = document.getElementById('lihatData');
       const responseModal = new bootstrap.Modal(document.getElementById('responseModal'));
+      const warningModal = new bootstrap.Modal(document.getElementById('warningModal'));
+      const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
       const dataTable = document.getElementById('dataTable');
       const tableBody = document.querySelector('#tableContent tbody');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const conflictMessage = document.getElementById('conflictMessage');
+      const conflictDetails = document.getElementById('conflictDetails');
+      const deleteMessage = document.getElementById('deleteMessage');
+      const deleteDetails = document.getElementById('deleteDetails');
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
 
       // Set tanggal minimum ke hari ini
       const today = new Date().toISOString().split('T')[0];
-      document.querySelector('input[name="tanggal"]').min = today;
-      document.querySelector('input[name="tanggal"]').value = today;
+      const tanggalInput = document.querySelector('input[name="tanggal"]');
+      if (tanggalInput) {
+        tanggalInput.min = today;
+        tanggalInput.value = today;
+      }
 
-      // Submit form
-      orderForm.addEventListener('submit', async e => {
-        e.preventDefault();
+      // Validasi waktu: jam akhir harus setelah jam mulai
+      function validateTime() {
+        const jamMulai = document.querySelector('input[name="mulai"]');
+        const jamAkhir = document.querySelector('input[name="akhir"]');
         
-        const submitBtn = e.target.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
-        submitBtn.disabled = true;
-        
-        try {
-          const formData = new FormData(e.target);
-          const params = new URLSearchParams(formData).toString();
-          
-          await fetch(`${scriptURL}?${params}`);
-          
-          responseModal.show();
-          e.target.reset();
-          document.querySelector('input[name="tanggal"]').value = today;
-          
-        } catch (err) {
-          alert("❌ Gagal menyimpan data!");
-        } finally {
-          submitBtn.innerHTML = originalText;
-          submitBtn.disabled = false;
+        if (jamMulai && jamAkhir && jamMulai.value && jamAkhir.value && jamAkhir.value <= jamMulai.value) {
+          alert('❌ Jam akhir harus setelah jam mulai!');
+          return false;
         }
-      });
+        return true;
+      }
 
-      // 🔥🔥🔥 PERBAIKAN BESAR: Tombol Lihat Data dengan data cleaning
-      lihatDataBtn.addEventListener('click', async () => {
-        const originalText = lihatDataBtn.innerHTML;
-        
-        lihatDataBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
-        lihatDataBtn.disabled = true;
-        
-        try {
-          const sheetUrl = scriptURL + '?read=true';
-          const res = await fetch(sheetUrl);
-          const data = await res.json().catch(() => []);
+      // Event listener untuk validasi waktu
+      const jamMulaiInput = document.querySelector('input[name="mulai"]');
+      const jamAkhirInput = document.querySelector('input[name="akhir"]');
+      if (jamMulaiInput) jamMulaiInput.addEventListener('change', validateTime);
+      if (jamAkhirInput) jamAkhirInput.addEventListener('change', validateTime);
+
+      // Load data saat halaman pertama kali dibuka
+      loadAllBookingData();
+
+      // Submit form dengan deteksi bentrok
+      if (orderForm) {
+        orderForm.addEventListener('submit', async e => {
+          e.preventDefault();
           
-          let html = '';
-          const latestData = data.slice(-20).reverse();
+          if (!validateTime()) return;
           
-          latestData.forEach((row, index) => {
-            // Skip header
-            if (index === 0 && row[0] === "Waktu Input") return;
+          const submitBtn = e.target.querySelector('button[type="submit"]');
+          const originalText = submitBtn.innerHTML;
+          
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Memproses...';
+          submitBtn.disabled = true;
+          
+          try {
+            const formData = new FormData(e.target);
+            const newBooking = {
+              tanggal: formData.get('tanggal'),
+              nama: formData.get('nama'),
+              divisi: formData.get('divisi'),
+              mulai: formData.get('mulai'),
+              akhir: formData.get('akhir'),
+              acara: formData.get('acara')
+            };
             
-            // Pastikan row memiliki cukup kolom
-            if (!row || row.length < 8) return;
+            // 🔥 DETEKSI BENTROK
+            const conflicts = checkScheduleConflicts(newBooking, allBookingData);
             
-            // 🔥 PERBAIKAN: Format setiap sel data dengan benar
-            const formattedRow = row.map((cell, cellIndex) => {
-              if (!cell) return '-';
+            if (conflicts.length > 0) {
+              currentConflictData = conflicts;
               
-              const strCell = String(cell).trim();
-              
-              // Skip jika ini header duplikat
-              if (strCell === "Waktu Input" && cellIndex === 0) return null;
-              
-              // Handle waktu yang error (1899-12-30)
-              if (strCell.includes('1899-12-30')) {
-                return '-';
+              if (conflictMessage) {
+                conflictMessage.innerHTML = `Jadwal Anda bertabrakan dengan ${conflicts.length} pemesanan lain:`;
               }
               
-              // Handle format ISO date yang tidak diinginkan
-              if (strCell.includes('T') && strCell.includes('Z') && strCell.includes('1899')) {
-                return '-';
+              let conflictHTML = '';
+              conflicts.forEach((conflict, index) => {
+                conflictHTML += `
+                  <div class="conflict-item mb-2 p-2 border rounded d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>${index + 1}. ${conflict.nama} (${conflict.divisi})</strong><br>
+                      <small>Tanggal: ${conflict.tanggal}</small><br>
+                      <small>Jam: ${conflict.mulai} - ${conflict.akhir}</small><br>
+                      <small>Acara: ${conflict.acara}</small>
+                    </div>
+                    <button class="btn btn-danger btn-sm delete-btn" onclick="showDeleteModal(${conflict.rowNumber}, '${conflict.nama}', '${conflict.tanggal}', '${conflict.mulai}-${conflict.akhir}')">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                `;
+              });
+              
+              if (conflictDetails) {
+                conflictDetails.innerHTML = conflictHTML;
               }
               
-              // Untuk kolom waktu (index 5 dan 6), pastikan format HH:mm
-              if ((cellIndex === 5 || cellIndex === 6) && strCell.match(/^\d{1,2}:\d{2}$/)) {
-                return strCell;
-              }
+              warningModal.show();
               
-              return strCell;
-            }).filter(cell => cell !== null); // Hapus null values
-            
-            // Hanya tambahkan row jika memiliki data yang valid
-            if (formattedRow.length === 8) {
-              html += `<tr>${formattedRow.map(cell => `<td>${cell}</td>`).join('')}</tr>`;
+              await loadAllBookingData();
+            } else {
+              // Tidak ada bentrok, simpan data
+              const params = new URLSearchParams(formData).toString();
+              const response = await fetch(`${scriptURL}?${params}`);
+              
+              if (response.ok) {
+                responseModal.show();
+                orderForm.reset();
+                if (tanggalInput) {
+                  tanggalInput.value = today;
+                }
+                await loadAllBookingData();
+              } else {
+                throw new Error('Gagal menyimpan data');
+              }
             }
-          });
-          
-          tableBody.innerHTML = html || '<tr><td colspan="8" class="text-center">Tidak ada data</td></tr>';
+            
+          } catch (err) {
+            console.error('Error:', err);
+            alert("❌ Gagal menyimpan data! Silakan coba lagi.");
+          } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+          }
+        });
+      }
+
+      // Confirm delete button event
+      if (confirmDeleteBtn) {
+        confirmDeleteBtn.addEventListener('click', function() {
+          if (currentDeleteIndex) {
+            deleteBooking(currentDeleteIndex);
+          }
+        });
+      }
+
+      // Tombol Lihat Data
+      if (lihatDataBtn) {
+        lihatDataBtn.addEventListener('click', async function() {
+          if (isTableLoading) return;
+
+          if (isTableVisible) {
+            hideDataTable();
+            return;
+          }
+
           dataTable.style.display = 'block';
-          dataTable.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          isTableVisible = true;
+          isTableLoading = true;
           
-        } catch (err) {
-          console.error('Error:', err);
-          alert("❌ Gagal memuat data!");
-        } finally {
-          lihatDataBtn.innerHTML = originalText;
-          lihatDataBtn.disabled = false;
-        }
-      });
+          const originalText = lihatDataBtn.innerHTML;
+          
+          lihatDataBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+          lihatDataBtn.disabled = true;
+          if (loadingSpinner) {
+            loadingSpinner.style.display = 'block';
+          }
+          if (tableBody) {
+            tableBody.innerHTML = '';
+          }
+          
+          try {
+            const sheetUrl = scriptURL + '?read=true';
+            const res = await fetch(sheetUrl);
+            
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            
+            const data = await res.json();
+            
+            let html = '';
+            
+            if (!data || data.length === 0) {
+              html = '<tr><td colspan="9" class="text-center text-muted">Tidak ada data pemesanan</td></tr>';
+            } else {
+              const bookingsForDetection = [];
+              const latestData = data.slice(-20).reverse();
+              
+              latestData.forEach((row, index) => {
+                const firstCell = String(row[0]).trim();
+                if (firstCell.includes("Waktu Input") && firstCell.includes("Tanggal Meeting")) return;
+                if (index === 0 && firstCell === "Waktu Input") return;
+                if (!row || row.length < 7) return;
+                
+                bookingsForDetection.push({
+                  id: index,
+                  tanggal: row[1] || '',
+                  mulai: row[4] || '',
+                  akhir: row[5] || ''
+                });
+              });
+              
+              const conflictIndexes = detectAllConflicts(bookingsForDetection);
+              let dataCount = 0;
+              
+              latestData.forEach((row, index) => {
+                const firstCell = String(row[0]).trim();
+                if (firstCell.includes("Waktu Input") && firstCell.includes("Tanggal Meeting")) return;
+                if (index === 0 && firstCell === "Waktu Input") return;
+                if (!row || row.length < 7) return;
+                
+                const waktuInput = row[0] || '-';
+                const tanggalMeeting = row[1] || '-';
+                const namaPemesan = row[2] || '-';
+                const divisi = row[3] || '-';
+                const jamMulai = row[4] || '-';
+                const jamAkhir = row[5] || '-';
+                const acara = row[6] || '-';
+                const rowNumber = data.length - index; // Calculate actual row number in sheet
+                
+                if (String(waktuInput).includes("Waktu Input") && 
+                    String(tanggalMeeting).includes("Tanggal Meeting")) return;
+                
+                if (!waktuInput && !tanggalMeeting && !namaPemesan && !divisi && !jamMulai && !jamAkhir && !acara) return;
+                
+                const formatTime = (timeStr) => {
+                  if (!timeStr || timeStr === '-') return '-';
+                  const str = String(timeStr);
+                  return str.length >= 5 ? str.substring(0, 5) : str;
+                };
+                
+                const isConflict = conflictIndexes.includes(index);
+                const rowClass = isConflict ? 'conflict-row' : '';
+                const statusBadge = isConflict ? '<span class="conflict-badge">BENTROK</span>' : '';
+                
+                html += `
+                  <tr class="${rowClass}">
+                    <td>${waktuInput}</td>
+                    <td>${tanggalMeeting}</td>
+                    <td>${namaPemesan}</td>
+                    <td>${divisi}</td>
+                    <td>${formatTime(jamMulai)}</td>
+                    <td>${formatTime(jamAkhir)}</td>
+                    <td>${acara}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                      <button class="btn btn-danger btn-sm delete-btn" onclick="showDeleteModal(${rowNumber}, '${namaPemesan.replace(/'/g, "\\'")}', '${tanggalMeeting}', '${formatTime(jamMulai)}-${formatTime(jamAkhir)}')">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                `;
+                
+                dataCount++;
+              });
+              
+              if (!html || dataCount === 0) {
+                html = '<tr><td colspan="9" class="text-center text-muted">Tidak ada data pemesanan yang dapat ditampilkan</td></tr>';
+              }
+            }
+            
+            if (tableBody) {
+              tableBody.innerHTML = html;
+            }
+            
+            setTimeout(() => {
+              dataTable.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+            
+          } catch (err) {
+            console.error('Error loading data:', err);
+            if (tableBody) {
+              tableBody.innerHTML = `
+                <tr>
+                  <td colspan="9" class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Gagal memuat data. Silakan coba lagi.
+                  </td>
+                </tr>
+              `;
+            }
+          } finally {
+            lihatDataBtn.innerHTML = '<i class="fas fa-list me-2"></i>Lihat Data Pemesanan';
+            lihatDataBtn.disabled = false;
+            if (loadingSpinner) {
+              loadingSpinner.style.display = 'none';
+            }
+            isTableLoading = false;
+          }
+        });
+      }
     });
   </script>
+  
 </body>
 </html>
